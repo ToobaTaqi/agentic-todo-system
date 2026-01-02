@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m unittest tests.unit.test_todo_service -v)",
+      "Bash(python -m unittest tests.unit.test_todo tests.unit.test_todo_service tests.integration.test_cli)"
+    ]
+  }
+}

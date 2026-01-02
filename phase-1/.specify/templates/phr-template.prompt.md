@@ -1,0 +1,36 @@
+# Prompt History Record Template
+
+ID: {{ID}}
+TITLE: {{TITLE}}
+STAGE: {{STAGE}}
+DATE_ISO: {{DATE_ISO}}
+SURFACE: {{SURFACE}}
+MODEL: {{MODEL}}
+FEATURE: {{FEATURE}}
+BRANCH: {{BRANCH}}
+USER: {{USER}}
+COMMAND: {{COMMAND}}
+LABELS: {{LABELS}}
+LINKS:
+  SPEC: {{SPEC_LINK}}
+  TICKET: {{TICKET_LINK}}
+  ADR: {{ADR_LINK}}
+  PR: {{PR_LINK}}
+
+FILES:
+{{FILES_YAML}}
+
+TESTS:
+{{TESTS_YAML}}
+
+## Prompt
+{{PROMPT_TEXT}}
+
+## Response
+{{RESPONSE_TEXT}}
+
+## Outcome
+{{OUTCOME}}
+
+## Evaluation
+{{EVALUATION}}
