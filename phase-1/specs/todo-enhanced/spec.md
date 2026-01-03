@@ -1,7 +1,7 @@
-# Todo CLI Feature Specification
+# Enhanced Todo CLI Feature Specification
 
 ## Overview
-A command-line interface application for managing todos with full CRUD operations using persistent storage and advanced features including priorities, tags, search, filter, sort, recurring tasks, and due date reminders.
+An enhanced command-line interface application for managing todos with advanced features including priorities, tags, search, filter, and sort capabilities, while maintaining full CRUD operations with persistent storage.
 
 ## Requirements
 - Create new todo items with optional priority and tags
@@ -14,9 +14,6 @@ A command-line interface application for managing todos with full CRUD operation
 - Sort todos by due date, priority, or alphabetically
 - Support priority levels: high, medium, low
 - Support tagging system for categorization (e.g., work, home, personal)
-- Support recurring tasks with scheduling (daily, weekly, monthly, yearly)
-- Support due date reminders with time notifications
-- Support intelligent task management features
 - Command-line interface with intuitive commands
 
 ## User Stories
@@ -30,11 +27,6 @@ A command-line interface application for managing todos with full CRUD operation
 8. As a user, I want to sort todos by due date, priority, or alphabetically so that I can organize my view
 9. As a user, I want to assign priority levels (high/medium/low) to todos so that I can prioritize work
 10. As a user, I want to tag todos (work/home/personal) so that I can categorize tasks
-11. As a user, I want to create recurring tasks (e.g., weekly meetings) so that I don't have to manually add repetitive tasks
-12. As a user, I want to set due dates with time reminders so that I'm notified before deadlines
-13. As a user, I want to receive notifications for upcoming due dates so that I don't miss important tasks
-14. As a user, I want to manage recurring task patterns so that I can modify or cancel recurring tasks
-15. As a user, I want to snooze reminders for later so that I can handle tasks at a more convenient time
 
 ## Acceptance Criteria
 - All operations work correctly with persistent storage
@@ -46,10 +38,6 @@ A command-line interface application for managing todos with full CRUD operation
 - Search functionality works across description, tags, and other fields
 - Filter functionality allows multiple criteria
 - Sort functionality supports multiple sorting options
-- Recurring tasks are automatically scheduled based on specified patterns
-- Due date reminders are triggered at specified times
-- Notifications are delivered reliably to users
-- Recurring tasks can be modified or cancelled without affecting past instances
 
 ## Constraints
 - All data stored persistently (JSON file storage)
@@ -57,5 +45,3 @@ A command-line interface application for managing todos with full CRUD operation
 - Console-based interface only
 - Priority values limited to high, medium, low
 - Tag values are strings with reasonable length limits
-- Recurring patterns: daily, weekly, monthly, yearly
-- Reminder system works in background without blocking CLI operations
