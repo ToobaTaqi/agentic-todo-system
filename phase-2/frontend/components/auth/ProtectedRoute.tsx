@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-// import { useAuth } from '../../../lib/contexts/AuthContext';
-import { useAuth } from '@/lib/contexts/AuthContext';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from "../../lib/contexts/AuthContext";
+// import { useAuth } from '@/lib/contexts/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  redirectTo?: string;
+  redirectTo?: any;
 }
 
-export default function ProtectedRoute({
+export default function ProtectedRoute(
+  {
   children,
-  redirectTo = '/auth/login'
+  redirectTo = "/auth/login",
 }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
