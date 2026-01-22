@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api/api";
 import { Task } from "@/lib/types/types";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { EditTaskModal } from "@/components/EditTaskModal/EditTaskModal";
-import { LabelSelector } from "@/components/LabelSelector/LabelSelector";
-import { SearchBar } from "@/components/SearchBar/SearchBar";
-import { FilterPanel } from "@/components/FilterPanel/FilterPanel";
-import { SortDropdown } from "@/components/SortDropdown/SortDropdown";
-import { useNotificationContext } from "@/components/Notifications/NotificationProvider";
+import ProtectedRoute from "../../components/auth/ProtectedRoute";
+import { EditTaskModal } from "../../components/EditTaskModal/EditTaskModal";
+import { LabelSelector } from "../../components/LabelSelector/LabelSelector";
+import { SearchBar } from "../../components/SearchBar/SearchBar";
+import { FilterPanel } from "../../components/FilterPanel/FilterPanel";
+import { SortDropdown } from "../../components/SortDropdown/SortDropdown";
+import { useNotificationContext } from "../../components/notifications/NotificationProvider";
 
 /* ---------------- TYPES ---------------- */
 
