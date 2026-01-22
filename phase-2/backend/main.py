@@ -13,10 +13,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Allow frontend origins
+    allow_origins=["http://localhost:3000", "https://agentic-todo-system-phase2.vercel.app"],  # Allow frontend origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
