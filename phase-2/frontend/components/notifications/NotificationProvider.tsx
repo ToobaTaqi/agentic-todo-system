@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useNotification } from '@/lib/hooks/useNotification';
+import { useNotification } from '../../lib/hooks/useNotification';
 
 interface NotificationContextType {
   isSupported: boolean;

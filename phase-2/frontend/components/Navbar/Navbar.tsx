@@ -1,7 +1,7 @@
 "use client";
 
 // import { useAuth } from '../../../lib/contexts/AuthContext';
-import { useAuth } from "@/lib/contexts/AuthContext";
+import { useAuth } from "../../lib/contexts/AuthContext";
 import Link from "next/link";
 import { useState } from "react";
 

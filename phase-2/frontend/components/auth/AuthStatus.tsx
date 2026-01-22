@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '../../../lib/contexts/AuthContext';
+import { useAuth } from '../../lib/contexts/AuthContext';
 
 export default function AuthStatus() {
   const { user, isAuthenticated, loading } = useAuth();

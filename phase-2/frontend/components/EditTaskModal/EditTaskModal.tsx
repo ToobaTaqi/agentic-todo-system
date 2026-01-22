@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Task } from "@/lib/types/types";
-import { api } from "@/lib/api/api";
-import { DateTimePicker } from "../DateTimePicker/DateTimePicker";
+// import { Task } from "@/lib/types/types";
+import { Task } from "../../lib/types/types"; 
+import { api } from "../../lib/api/api";
+// import { DateTimePicker } from "../DateTimePicker/DateTimePicker";
 import { PriorityBadge } from "../PriorityBadge/PriorityBadge";
 import { TagChip } from "../TagChip/TagChip";
 import { LabelSelector } from "../LabelSelector/LabelSelector";
