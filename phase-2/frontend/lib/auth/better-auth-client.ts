@@ -1,23 +1,11 @@
 // lib/auth/better-auth-client.ts
-import { createAuth } from "better-auth";
+import { createAuthClient } from "better-auth/client";
 
-export const auth = createAuth({
+export const auth = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
-  plugins: [
-    // Enable JWT plugin as required by the constitution
-    {
-      $id: "jwt-plugin",
-      client: {},
-      server: {
-        $context: (ctx) => ({
-          secret: process.env.BETTER_AUTH_SECRET!,
-        }),
-      },
-    },
-  ],
-  secret: process.env.BETTER_AUTH_SECRET,
-  trustHost: true,
+  // Note: plugins are typically configured on the server side, not client side
+  // JWT plugin would be configured in the server-side auth setup
 });
 
 // Export the types for TypeScript
-export type AuthSession = Awaited<ReturnType<typeof auth.api.getSession>>;
+export type { Session } from "better-auth/types";
