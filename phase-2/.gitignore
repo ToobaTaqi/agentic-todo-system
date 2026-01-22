@@ -1,0 +1,350 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env.ci
+.env.backup
+.env.example
+.env.sample
+.env.default
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vs/
+*.sublime-workspace
+*.sublime-project
+*.tm_properties
+*.tmlanguage.cache
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+*.buildinfo
+
+# JSHint configuration files
+.jshintrc
+.flowconfig
+
+# Vim
+*.un~
+Session.vim
+.netrwhist
+*~
+# nvim
+*.nvim*
+[._]*.un~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Spyder REPL files
+.spyderproject
+.spyproject
+.spyproject.*
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+.coverage.*
+
+# Docker
+.dockerignore
+docker-compose*.yaml
+docker-compose*.yml
+
+# Next.js
+.next/
+out/
+.export
+
+# Next.js profiling (when enabled)
+__next_traces
+
+# Turbopack (new Next.js builder)
+!.next/trace
+!.next/prerender-manifest.json
+!.next/SERVER_REFERENCE_MANIFEST.json
+!.next/SERVER_REFERENCE_MANIFEST.js
+
+# Parcel cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/build
+
+# CodeClimate
+.codeclimate.yml
+
+# Angular
+.angular/
+
+# StackBlitz
+.stackblitzrc
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# pnpm
+.pnpm-store/
+
+# nx (monorepo tool)
+.nx/
+
+# Firebase
+.firebase/
+
+# Serverless
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-project
+.tern-defs
+
+# Waf
+.wafpickle-*
+
+# ST-Link
+ST-LINK_CLI.exe
+
+# Codecov
+.codecov.yml
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.clang-format
+
+# Python specific
+*.manifest
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# FastAPI/uvicorn
+uvicorn_error.log
+uvicorn_access.log
+
+# Poetry
+.poetry/
+
+# Pipenv
+Pipfile.lock
+
+# Heroku
+.heroku/
+
+# Netlify
+.netlify/
+
+# Vercel
+.vercel/
+
+# Sentry
+.sentry/
+sentry-cli.log
+
+# Backend specific
+/backend/__pycache__/
+/backend/*.py[cod]
+/backend/*$py.class
+/backend/*.so
+/backend/.Python
+/backend/build/
+/backend/dist/
+/backend/*.egg-info/
+/backend/*.egg
+
+# Frontend specific
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/public/build/
+/frontend/coverage/
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Local development
+.env.local
+.env.*.local
+.env.staging
+.env.production
+
+# IDE and editor files
+*.orig
+*.rej
+*.bak
+*.tmp
+*.save
+*.swp
+*.swo
+*~
+.DS_Store
+ehthumbs.db
+Thumbs.db
+desktop.ini
+Icon?
+VolumeIcon.icns
