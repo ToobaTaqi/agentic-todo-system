@@ -1,6 +1,7 @@
 // frontend/lib/hooks/useNotification.ts
 import { useEffect, useState, useRef } from 'react';
-import { NotificationService } from '@/components/Notifications/NotificationService';
+// import { NotificationService } from '@/components/Notifications/NotificationService';
+import { NotificationService } from '../../components/notifications/NotificationService'; 
 
 export interface TaskWithDueDate {
   id: string;
