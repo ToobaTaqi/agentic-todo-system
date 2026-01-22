@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { api } from "@/lib/api/api";
-import { Task } from "@/lib/types/types";
+import { api } from "../../lib/api/api";
+import { Task } from "../../lib/types/types";
 import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import { EditTaskModal } from "../../components/EditTaskModal/EditTaskModal";
 import { LabelSelector } from "../../components/LabelSelector/LabelSelector";
