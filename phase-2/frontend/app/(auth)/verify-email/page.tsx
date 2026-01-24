@@ -14,6 +14,9 @@ export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
+  // Ref to hold the redirect timeout ID
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Automatically verify the token when the page loads
   useEffect(() => {
     const verifyTokenOnLoad = async () => {
@@ -44,8 +47,13 @@ export default function VerifyEmailPage() {
         if (response.ok) {
           setMessage(data.message || 'Email verified successfully!');
 
+          // Clear any existing timeout to prevent multiple redirects
+          if (redirectTimeoutRef.current) {
+            clearTimeout(redirectTimeoutRef.current);
+          }
+
           // Redirect to login after a short delay so user can log in with verified status
-          setTimeout(() => {
+          redirectTimeoutRef.current = setTimeout(() => {
             router.push('/auth/login'); // Redirect to login after verification
           }, 3000);
         } else {
@@ -63,6 +71,13 @@ export default function VerifyEmailPage() {
     if (token && !loading && !message && !error) {
       verifyTokenOnLoad();
     }
+
+    // Cleanup function to clear timeout if component unmounts
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
   }, [token, loading, message, error, router]);
 
   const handleVerifyClick = async () => {
@@ -93,8 +108,13 @@ export default function VerifyEmailPage() {
       if (response.ok) {
         setMessage(data.message || 'Email verified successfully!');
 
+        // Clear any existing timeout to prevent multiple redirects
+        if (redirectTimeoutRef.current) {
+          clearTimeout(redirectTimeoutRef.current);
+        }
+
         // Redirect to login after a short delay so user can log in with verified status
-        setTimeout(() => {
+        redirectTimeoutRef.current = setTimeout(() => {
           router.push('/auth/login'); // Redirect to login after verification
         }, 3000);
       } else {
