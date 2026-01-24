@@ -7,19 +7,24 @@ import { useAuth } from '../lib/contexts/AuthContext';
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading) {
       if (isAuthenticated) {
-        // If user is authenticated, redirect to dashboard
-        router.push('/dashboard');
+        // If user is authenticated but not verified, redirect to check-inbox
+        if (user && !user.is_verified) {
+          router.push('/check-inbox');
+        } else {
+          // If user is authenticated and verified, redirect to dashboard
+          router.push('/dashboard');
+        }
       } else {
         // If user is not authenticated, redirect to login
         router.push('/auth/login');
       }
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, user, loading, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

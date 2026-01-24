@@ -240,6 +240,7 @@ To enable email verification functionality:
 2. **Environment Variables**:
    - `SENDER_EMAIL`: The Gmail address to send verification emails from
    - `GMAIL_APP_PASSWORD`: The 16-character app password (NOT your regular Gmail password)
+   - `FRONTEND_BASE_URL`: The base URL for verification links (defaults to http://localhost:3000)
 
 3. **Important Notes**:
    - Do NOT use your regular Gmail password

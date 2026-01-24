@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function ResetPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -17,22 +17,25 @@ export default function ResetPasswordPage() {
 
     try {
       // In a real implementation, this would call your backend password reset endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/auth/reset-password-request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"}/api/v1/auth/reset-password-request`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
         },
-        body: JSON.stringify({ email }),
-      });
+      );
 
       if (response.ok) {
         setSuccess(true);
       } else {
         // Handle error
-        console.error('Password reset request failed');
+        console.error("Password reset request failed");
       }
     } catch (error) {
-      console.error('Password reset request error:', error);
+      console.error("Password reset request error:", error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +50,8 @@ export default function ResetPasswordPage() {
               Password Reset Email Sent
             </h2>
             <p className="mt-2 text-text-secondary">
-              If an account exists with that email, you'll receive a password reset link shortly.
+              If an account exists with that email, you'll receive a password
+              reset link shortly.
             </p>
             <div className="mt-6">
               <Link
@@ -77,7 +81,10 @@ export default function ResetPasswordPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text-secondary">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-text-secondary"
+            >
               Email address
             </label>
             <input
@@ -99,13 +106,16 @@ export default function ResetPasswordPage() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
+              {loading ? "Sending..." : "Send Reset Link"}
             </button>
           </div>
         </form>
 
         <div className="text-center text-sm text-text-secondary">
-          <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link
+            href="/auth/login"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
             Back to Login
           </Link>
         </div>

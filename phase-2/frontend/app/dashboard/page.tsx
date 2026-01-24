@@ -261,7 +261,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireVerified={true}>
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">

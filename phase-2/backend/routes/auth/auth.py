@@ -205,10 +205,17 @@ async def reset_password(token: str, new_password: str, db: AsyncSession = Depen
     return {"message": "Password reset successful"}
 
 
-@router.get("/verify-email")
-async def verify_email(token: str, db: AsyncSession = Depends(get_db_session)):
+from pydantic import BaseModel
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+@router.post("/verify-email")
+async def verify_email(request: VerifyEmailRequest, db: AsyncSession = Depends(get_db_session)):
     """Verify user email using the verification token"""
+    token = request.token
     print(f"Verify email endpoint hit with token: {token}")
+    print("🔥 VERIFY EMAIL API HIT 🔥")
 
     # Find the verification token in the database
     statement = select(VerificationToken).where(VerificationToken.token == token)

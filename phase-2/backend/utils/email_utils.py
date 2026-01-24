@@ -51,7 +51,9 @@ async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
                 "error": "Email service not configured. Please set SENDER_EMAIL and GMAIL_APP_PASSWORD environment variables."
             }
 
-        verification_url = f"http://localhost:3000/verify-email?token={token}"
+        # Get the frontend base URL from environment, default to localhost for development
+        frontend_base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
+        verification_url = f"{frontend_base_url}/verify-email?token={token}"
 
         # Create message
         msg = MIMEMultipart('alternative')
@@ -71,11 +73,6 @@ async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
                           border-radius: 8px; display: inline-block; font-weight: bold; font-size: 16px;">
                     Verify Your Email Address
                 </a>
-            </div>
-
-            <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 5px 0;"><strong>Verification Link:</strong></p>
-                <p style="word-break: break-all; color: #6B7280; font-size: 14px; margin: 5px 0;">{verification_url}</p>
             </div>
 
             <p style="font-size: 14px; color: #6B7280; margin: 20px 0;">

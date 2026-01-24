@@ -8,21 +8,26 @@ import { useRouter } from "next/navigation";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   redirectTo?: any;
+  requireVerified?: boolean;
 }
 
 export default function ProtectedRoute(
   {
   children,
   redirectTo = "/auth/login",
-}: ProtectedRouteProps) {
-  const { isAuthenticated, loading } = useAuth();
+  requireVerified = true, // Whether to require email verification
+}: ProtectedRouteProps & { requireVerified?: boolean }) {
+  const { isAuthenticated, user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push(redirectTo);
+    } else if (!loading && isAuthenticated && requireVerified && user && !user.is_verified) {
+      // If user is authenticated but not verified, redirect to check-inbox page
+      router.push("/check-inbox");
     }
-  }, [isAuthenticated, loading, router, redirectTo]);
+  }, [isAuthenticated, user, loading, router, redirectTo, requireVerified]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -35,8 +40,8 @@ export default function ProtectedRoute(
     );
   }
 
-  // If authenticated, render the protected content
-  if (isAuthenticated) {
+  // If authenticated and verified (or verification not required), render the protected content
+  if (isAuthenticated && (!requireVerified || (user && user.is_verified))) {
     return <>{children}</>;
   }
 
