@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+// Disable static generation for this page since it requires client-side hooks
+export const dynamic = 'force-dynamic';
+
 export default function VerifyEmailPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
