@@ -1,14 +1,12 @@
-"""Email utility functions for sending verification emails via Gmail SMTP."""
+"""Email utility functions for sending verification emails via Resend."""
 import asyncio
 import os
 from typing import Dict, Any
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import logging
 import secrets
 from datetime import datetime, timedelta
-import aiosmtplib
+import resend
 
 # Load environment variables
 load_dotenv()
@@ -30,7 +28,7 @@ def generate_expiration_time(minutes: int = 30) -> datetime:
 
 async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
     """
-    Send verification email to the user asynchronously via Gmail SMTP.
+    Send verification email to the user asynchronously via Resend.
 
     Args:
         email: User's email address
@@ -40,26 +38,20 @@ async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
         Dictionary with success status and message
     """
     try:
-        # Get Gmail SMTP credentials from environment
-        sender_email = os.getenv("SENDER_EMAIL")
-        app_password = os.getenv("GMAIL_APP_PASSWORD")
+        # Get Resend API key from environment
+        resend_api_key = os.getenv("RESEND_API_KEY")
+        sender_email = os.getenv("SENDER_EMAIL", "onboarding@example.com")
 
-        if not sender_email or not app_password:
-            logger.error("SENDER_EMAIL or GMAIL_APP_PASSWORD environment variables not set")
+        if not resend_api_key:
+            logger.error("RESEND_API_KEY environment variable not set")
             return {
                 "success": False,
-                "error": "Email service not configured. Please set SENDER_EMAIL and GMAIL_APP_PASSWORD environment variables."
+                "error": "Email service not configured. Please set RESEND_API_KEY environment variable."
             }
 
         # Get the frontend base URL from environment, default to localhost for development
         frontend_base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
         verification_url = f"{frontend_base_url}/verify-email?token={token}"
-
-        # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = "Verify Your Email Address - AI-Ready Todo App"
-        msg['From'] = sender_email
-        msg['To'] = email
 
         # Create HTML content
         html_content = f"""
@@ -87,24 +79,24 @@ async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
         </div>
         """
 
-        # Create HTML part
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
+        # Initialize Resend with API key
+        resend.api_key = resend_api_key
 
-        # Send email using Gmail SMTP with aiosmtplib for proper async support
-        await aiosmtplib.send(
-            msg,
-            hostname='smtp.gmail.com',
-            port=587,
-            start_tls=True,
-            username=sender_email,
-            password=app_password,
-        )
+        # Send email using Resend
+        params = {
+            "from": sender_email,
+            "to": [email],
+            "subject": "Verify Your Email Address - AI-Ready Todo App",
+            "html": html_content,
+        }
+
+        email_response = resend.Emails.send(params)
 
         logger.info(f"Verification email sent successfully to {email}")
         return {
             "success": True,
-            "message": "Verification email sent successfully"
+            "message": "Verification email sent successfully",
+            "email_id": email_response["id"] if isinstance(email_response, dict) and "id" in email_response else None
         }
 
     except Exception as e:
@@ -117,7 +109,7 @@ async def send_verification_email(email: str, token: str) -> Dict[str, Any]:
 
 async def send_test_email(email: str) -> Dict[str, Any]:
     """
-    Send a test email to verify email configuration via Gmail SMTP.
+    Send a test email to verify email configuration via Resend.
 
     Args:
         email: Test email address
@@ -126,22 +118,16 @@ async def send_test_email(email: str) -> Dict[str, Any]:
         Dictionary with success status and message
     """
     try:
-        # Get Gmail SMTP credentials from environment
-        sender_email = os.getenv("SENDER_EMAIL")
-        app_password = os.getenv("GMAIL_APP_PASSWORD")
+        # Get Resend API key from environment
+        resend_api_key = os.getenv("RESEND_API_KEY")
+        sender_email = os.getenv("SENDER_EMAIL", "onboarding@example.com")
 
-        if not sender_email or not app_password:
-            logger.error("SENDER_EMAIL or GMAIL_APP_PASSWORD environment variables not set for test email")
+        if not resend_api_key:
+            logger.error("RESEND_API_KEY environment variable not set for test email")
             return {
                 "success": False,
-                "error": "Email service not configured. Please set SENDER_EMAIL and GMAIL_APP_PASSWORD environment variables."
+                "error": "Email service not configured. Please set RESEND_API_KEY environment variable."
             }
-
-        # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = "Test Email from AI-Ready Todo App"
-        msg['From'] = sender_email
-        msg['To'] = email
 
         # Create HTML content
         html_content = """
@@ -155,24 +141,24 @@ async def send_test_email(email: str) -> Dict[str, Any]:
         </div>
         """
 
-        # Create HTML part
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
+        # Initialize Resend with API key
+        resend.api_key = resend_api_key
 
-        # Send email using Gmail SMTP with aiosmtplib for proper async support
-        await aiosmtplib.send(
-            msg,
-            hostname='smtp.gmail.com',
-            port=587,
-            start_tls=True,
-            username=sender_email,
-            password=app_password,
-        )
+        # Send email using Resend
+        params = {
+            "from": sender_email,
+            "to": [email],
+            "subject": "Test Email from AI-Ready Todo App",
+            "html": html_content,
+        }
+
+        email_response = resend.Emails.send(params)
 
         logger.info(f"Test email sent successfully to {email}")
         return {
             "success": True,
-            "message": "Test email sent successfully"
+            "message": "Test email sent successfully",
+            "email_id": email_response["id"] if isinstance(email_response, dict) and "id" in email_response else None
         }
 
     except Exception as e:

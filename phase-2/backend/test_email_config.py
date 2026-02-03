@@ -13,15 +13,15 @@ async def test_email_configuration():
 
     # Check if required environment variables are set
     sender_email = os.getenv("SENDER_EMAIL")
-    gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
+    resend_api_key = os.getenv("RESEND_API_KEY")
 
     print("Testing email configuration...")
     print(f"SENDER_EMAIL: {sender_email}")
-    print(f"GMAIL_APP_PASSWORD set: {'Yes' if gmail_app_password else 'No'}")
+    print(f"RESEND_API_KEY set: {'Yes' if resend_api_key else 'No'}")
 
-    if not sender_email or not gmail_app_password:
+    if not resend_api_key:
         print("ERROR: Email configuration is incomplete!")
-        print("Please set SENDER_EMAIL and GMAIL_APP_PASSWORD in your .env file.")
+        print("Please set RESEND_API_KEY in your .env file.")
         return
 
     # Test with a sample email (replace with your test email)
@@ -39,6 +39,8 @@ async def test_email_configuration():
         if result["success"]:
             print("✅ SUCCESS: Test email sent successfully!")
             print(f"Message: {result['message']}")
+            if 'email_id' in result and result['email_id']:
+                print(f"Email ID: {result['email_id']}")
         else:
             print("❌ FAILED: Could not send test email!")
             print(f"Error: {result['error']}")

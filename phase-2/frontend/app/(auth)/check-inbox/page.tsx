@@ -77,6 +77,19 @@ export default function CheckInboxPage() {
               Resend Email
             </button>
           </div>
+
+          {/* Information for teachers */}
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <h3 className="text-sm font-semibold text-yellow-800 mb-2">For Teachers:</h3>
+            <p className="text-xs text-yellow-700 mb-2">
+              <strong>Demo Credentials:</strong> Email: <code className="bg-yellow-100 px-1 rounded">toobtq01@gmail.com</code> | Password: <code className="bg-yellow-100 px-1 rounded">asklty01</code>
+            </p>
+            <p className="text-xs text-yellow-700">
+              <strong>Email Verification Note:</strong> This app uses Resend for email verification.
+              Due to free tier limitations, verification emails are only sent to the registered domain email.
+              To experience the full app, use the demo credentials above.
+            </p>
+          </div>
         </div>
       </div>
     </div>

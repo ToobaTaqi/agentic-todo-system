@@ -211,7 +211,7 @@ pytest -v
 | JWT_ALGORITHM | Algorithm for JWT (default: HS256) | No |
 | ACCESS_TOKEN_EXPIRE_MINUTES | Token expiration in minutes (default: 10080 for 7 days) | No |
 | SENDER_EMAIL | Email address for sending verification emails | For email verification |
-| GMAIL_APP_PASSWORD | App password for Gmail SMTP authentication | For email verification |
+| RESEND_API_KEY | API key for Resend email service | For email verification |
 
 ## Deployment
 
@@ -227,24 +227,36 @@ For production deployment:
 
 To enable email verification functionality:
 
-1. **Configure Gmail SMTP**:
+1. **Configure Resend Email Service (Recommended for Production/Cloud)**:
+   - Create an account at [resend.com](https://resend.com)
+   - Get your API key from the dashboard
+   - Add a domain (or use the test domain for development)
+   - Update your `.env` file with:
+     ```env
+     RESEND_API_KEY=your_resend_api_key_here
+     SENDER_EMAIL=onboarding@yourdomain.com  # Use your registered domain with Resend
+     ```
+
+2. **Alternative: Configure Gmail SMTP (Not recommended for cloud platforms like Railway)**:
    - Enable 2-factor authentication on your Gmail account
    - Go to Google Account settings > Security > App passwords
    - Generate an app password for "Mail" and your device
    - Update your `.env` file with:
      ```env
-     SENDER_EMAIL=toobtq@gmail.com
+     SENDER_EMAIL=your_email@gmail.com
      GMAIL_APP_PASSWORD=your_16_char_app_password_here
      ```
 
-2. **Environment Variables**:
-   - `SENDER_EMAIL`: The Gmail address to send verification emails from
-   - `GMAIL_APP_PASSWORD`: The 16-character app password (NOT your regular Gmail password)
+   **Note**: Gmail SMTP may not work on cloud platforms like Railway due to IP restrictions.
+
+3. **Environment Variables**:
+   - `RESEND_API_KEY`: Your Resend API key (recommended for production/cloud)
+   - `SENDER_EMAIL`: The email address registered with your email service
    - `FRONTEND_BASE_URL`: The base URL for verification links (defaults to http://localhost:3000)
 
-3. **Important Notes**:
-   - Do NOT use your regular Gmail password
-   - App passwords are 16 characters long and contain spaces when displayed, but enter without spaces
+4. **Important Notes**:
+   - For cloud deployments (like Railway), Resend is strongly recommended over Gmail SMTP
+   - With Resend, you can use the test domain for development or register your own domain
    - The email verification system sends a verification link to new users upon registration
    - Users must verify their email within 30 minutes of registration
 
@@ -254,8 +266,10 @@ To enable email verification functionality:
 - For authentication issues, ensure the `BETTER_AUTH_SECRET` matches between frontend and backend
 - If endpoints return 403 errors, check that the user_id in the URL matches the authenticated user
 - For token expiration issues, verify that the clock on your server is synchronized
-- For email verification issues, ensure `GMAIL_APP_PASSWORD` is correctly set to a valid app password
+- For email verification issues, ensure `RESEND_API_KEY` is correctly set for cloud deployments (recommended for Railway)
+- If using Gmail SMTP locally, ensure `GMAIL_APP_PASSWORD` is correctly set to a valid app password
 - If users don't receive verification emails, check that the email configuration is correct and that emails are not going to spam/junk folders
+- For Railway deployments, Resend is recommended over Gmail SMTP due to cloud platform restrictions
 
 ## API Documentation
 
