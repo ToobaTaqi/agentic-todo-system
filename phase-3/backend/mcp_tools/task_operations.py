@@ -11,6 +11,9 @@ from fastapi import HTTPException, status
 from sqlmodel import select
 from datetime import datetime, timedelta
 import uuid
+from utils.task_resolver import resolve_task_id_from_name, get_task_by_name
+from websocket_manager import manager
+import json
 
 
 class ToolResult(BaseModel):
@@ -35,9 +38,16 @@ class AddTaskParams(BaseModel):
         if self.priority and self.priority not in ["high", "medium", "low"]:
             raise ValueError("Priority must be one of: high, medium, low")
 
-        # Validate recurrence pattern
-        if self.is_recurring and self.recurrence_pattern not in ["daily", "weekly", "monthly"]:
-            raise ValueError("Recurrence pattern must be one of: daily, weekly, monthly")
+        # Validate recurrence pattern only if is_recurring is true
+        if self.is_recurring and self.recurrence_pattern:
+            if self.recurrence_pattern not in ["daily", "weekly", "monthly"]:
+                raise ValueError("Recurrence pattern must be one of: daily, weekly, monthly when is_recurring is true")
+        elif self.is_recurring and not self.recurrence_pattern:
+            # If is_recurring is true but no pattern provided, set a default
+            object.__setattr__(self, 'recurrence_pattern', 'daily')
+        elif not self.is_recurring:
+            # If not recurring, ensure recurrence_pattern is None
+            object.__setattr__(self, 'recurrence_pattern', None)
 
 
 class ListTasksParams(BaseModel):
@@ -70,17 +80,30 @@ class ListTasksParams(BaseModel):
 
 class CompleteTaskParams(BaseModel):
     """Parameters for complete_task tool."""
-    task_id: str
+    task_id: Optional[str] = None  # Keep for backward compatibility
+    task_name: Optional[str] = None  # New field for natural language task identification
 
+    def model_post_init__(self, __context: Any) -> None:
+        # Either task_id or task_name must be provided
+        if not self.task_id and not self.task_name:
+            raise ValueError("Either task_id or task_name must be provided")
+        
 
 class DeleteTaskParams(BaseModel):
     """Parameters for delete_task tool."""
-    task_id: str
+    task_id: Optional[str] = None  # Keep for backward compatibility
+    task_name: Optional[str] = None  # New field for natural language task identification
+
+    def model_post_init__(self, __context: Any) -> None:
+        # Either task_id or task_name must be provided
+        if not self.task_id and not self.task_name:
+            raise ValueError("Either task_id or task_name must be provided")
 
 
 class UpdateTaskParams(BaseModel):
     """Parameters for update_task tool."""
-    task_id: str
+    task_id: Optional[str] = None  # Keep for backward compatibility
+    task_name: Optional[str] = None  # New field for natural language task identification
     title: Optional[str] = None
     description: Optional[str] = None
     priority: Optional[str] = None
@@ -90,13 +113,24 @@ class UpdateTaskParams(BaseModel):
     recurrence_pattern: Optional[str] = None
 
     def model_post_init__(self, __context: Any) -> None:
+        # Either task_id or task_name must be provided
+        if not self.task_id and not self.task_name:
+            raise ValueError("Either task_id or task_name must be provided")
+        
         # Validate priority if provided
         if self.priority and self.priority not in ["high", "medium", "low"]:
             raise ValueError("Priority must be one of: high, medium, low")
 
-        # Validate recurrence pattern if provided
-        if self.recurrence_pattern and self.recurrence_pattern not in ["daily", "weekly", "monthly"]:
-            raise ValueError("Recurrence pattern must be one of: daily, weekly, monthly")
+        # Validate recurrence pattern only if is_recurring is true and pattern is provided
+        if self.is_recurring is True and self.recurrence_pattern:
+            if self.recurrence_pattern not in ["daily", "weekly", "monthly"]:
+                raise ValueError("Recurrence pattern must be one of: daily, weekly, monthly when is_recurring is true")
+        elif self.is_recurring is True and not self.recurrence_pattern:
+            # If is_recurring is true but no pattern provided, set a default
+            object.__setattr__(self, 'recurrence_pattern', 'daily')
+        elif self.is_recurring is False:
+            # If not recurring, ensure recurrence_pattern is None
+            object.__setattr__(self, 'recurrence_pattern', None)
 
 
 async def add_task_tool(params: dict, user_id: str) -> ToolResult:
@@ -121,11 +155,18 @@ async def add_task_tool(params: dict, user_id: str) -> ToolResult:
         if validated_params.due_date:
             try:
                 due_date_value = datetime.fromisoformat(validated_params.due_date.replace('Z', '+00:00'))
+                # Convert to timezone-naive to match database expectations
+                if due_date_value.tzinfo is not None:
+                    due_date_value = due_date_value.replace(tzinfo=None)
             except ValueError:
                 return ToolResult(success=False, error="Invalid due date format")
 
+        # Import here to avoid circular imports
+        from database.db import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
         # Create task
-        async with get_db_session() as db:
+        async with AsyncSession(engine) as db:
             new_task = Task(
                 user_id=uuid.UUID(user_id),
                 title=validated_params.title,
@@ -142,6 +183,17 @@ async def add_task_tool(params: dict, user_id: str) -> ToolResult:
             await db.commit()
             await db.refresh(new_task)
 
+            # Send real-time update to the frontend
+            try:
+                await manager.broadcast_to_user({
+                    "type": "task_created",
+                    "task": new_task.dict(),
+                    "timestamp": datetime.utcnow().isoformat()
+                }, user_id)
+            except Exception as e:
+                # Log the error but don't fail the operation
+                print(f"Error broadcasting task creation: {str(e)}")
+
             return ToolResult(success=True, data=new_task.dict())
 
     except ValidationError as ve:
@@ -155,7 +207,11 @@ async def list_tasks_tool(params: dict, user_id: str) -> ToolResult:
     try:
         validated_params = ListTasksParams(**params)
 
-        async with get_db_session() as db:
+        # Import here to avoid circular imports
+        from database.db import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+
+        async with AsyncSession(engine) as db:
             statement = select(Task).where(Task.user_id == uuid.UUID(user_id))
 
             # Apply filters
@@ -189,8 +245,8 @@ async def list_tasks_tool(params: dict, user_id: str) -> ToolResult:
             offset = (validated_params.page - 1) * validated_params.limit
             statement = statement.offset(offset).limit(validated_params.limit)
 
-            result = await db.exec(statement)
-            tasks = result.all()
+            result = await db.execute(statement)
+            tasks = result.scalars().all()
 
             task_dicts = [task.dict() for task in tasks]
 
@@ -214,21 +270,32 @@ async def complete_task_tool(params: dict, user_id: str) -> ToolResult:
     try:
         validated_params = CompleteTaskParams(**params)
 
-        # Validate UUID format
-        try:
-            task_uuid = uuid.UUID(validated_params.task_id)
-        except ValueError:
-            return ToolResult(success=False, error="Invalid task ID format")
-
-        async with get_db_session() as db:
-            # Get the task and verify ownership
-            statement = select(Task).where(
-                Task.id == task_uuid,
-                Task.user_id == uuid.UUID(user_id)
-            )
-            result = await db.exec(statement)
-            task = result.first()
-
+        # Import here to avoid circular imports
+        from database.db import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Create a session directly using the engine
+        async with AsyncSession(engine) as db:
+            task = None
+            
+            # Determine the task based on either task_id or task_name
+            if validated_params.task_id:
+                # Validate UUID format
+                try:
+                    task_uuid = uuid.UUID(validated_params.task_id)
+                    # Get the task by ID and verify ownership
+                    statement = select(Task).where(
+                        Task.id == task_uuid,
+                        Task.user_id == uuid.UUID(user_id)
+                    )
+                    result = await db.execute(statement)
+                    task = result.scalar_one_or_none()
+                except ValueError:
+                    return ToolResult(success=False, error="Invalid task ID format")
+            elif validated_params.task_name:
+                # Get the task by name
+                task = await get_task_by_name(db, user_id, validated_params.task_name)
+            
             if not task:
                 return ToolResult(success=False, error="Task not found or not authorized")
 
@@ -258,6 +325,17 @@ async def complete_task_tool(params: dict, user_id: str) -> ToolResult:
             await db.commit()
             await db.refresh(task)
 
+            # Send real-time update to the frontend
+            try:
+                await manager.broadcast_to_user({
+                    "type": "task_updated",  # Completion is a form of update
+                    "task": task.dict(),
+                    "timestamp": datetime.utcnow().isoformat()
+                }, user_id)
+            except Exception as e:
+                # Log the error but don't fail the operation
+                print(f"Error broadcasting task completion: {str(e)}")
+
             return ToolResult(success=True, data=task.dict())
 
     except ValidationError as ve:
@@ -271,26 +349,52 @@ async def delete_task_tool(params: dict, user_id: str) -> ToolResult:
     try:
         validated_params = DeleteTaskParams(**params)
 
-        # Validate UUID format
-        try:
-            task_uuid = uuid.UUID(validated_params.task_id)
-        except ValueError:
-            return ToolResult(success=False, error="Invalid task ID format")
-
-        async with get_db_session() as db:
-            # Get the task and verify ownership
-            statement = select(Task).where(
-                Task.id == task_uuid,
-                Task.user_id == uuid.UUID(user_id)
-            )
-            result = await db.exec(statement)
-            task = result.first()
-
+        # Import here to avoid circular imports
+        from database.db import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Create a session directly using the engine
+        async with AsyncSession(engine) as db:
+            task = None
+            
+            # Determine the task based on either task_id or task_name
+            if validated_params.task_id:
+                # Validate UUID format
+                try:
+                    task_uuid = uuid.UUID(validated_params.task_id)
+                    # Get the task by ID and verify ownership
+                    statement = select(Task).where(
+                        Task.id == task_uuid,
+                        Task.user_id == uuid.UUID(user_id)
+                    )
+                    result = await db.execute(statement)
+                    task = result.scalar_one_or_none()
+                except ValueError:
+                    return ToolResult(success=False, error="Invalid task ID format")
+            elif validated_params.task_name:
+                # Get the task by name
+                task = await get_task_by_name(db, user_id, validated_params.task_name)
+            
             if not task:
                 return ToolResult(success=False, error="Task not found or not authorized")
 
+            # Get the task data before deletion to send in the update
+            task_data = task.dict()
+            
             await db.delete(task)
             await db.commit()
+
+            # Send real-time update to the frontend
+            try:
+                await manager.broadcast_to_user({
+                    "type": "task_deleted",
+                    "task_id": str(task_data['id']),
+                    "task_title": task_data['title'],
+                    "timestamp": datetime.utcnow().isoformat()
+                }, user_id)
+            except Exception as e:
+                # Log the error but don't fail the operation
+                print(f"Error broadcasting task deletion: {str(e)}")
 
             return ToolResult(success=True, data={"message": "Task deleted successfully"})
 
@@ -304,12 +408,6 @@ async def update_task_tool(params: dict, user_id: str) -> ToolResult:
     """MCP tool to update task properties."""
     try:
         validated_params = UpdateTaskParams(**params)
-
-        # Validate UUID format
-        try:
-            task_uuid = uuid.UUID(validated_params.task_id)
-        except ValueError:
-            return ToolResult(success=False, error="Invalid task ID format")
 
         # Validate title length if provided
         if validated_params.title and len(validated_params.title) > 255:
@@ -328,33 +426,70 @@ async def update_task_tool(params: dict, user_id: str) -> ToolResult:
         if validated_params.due_date:
             try:
                 due_date_value = datetime.fromisoformat(validated_params.due_date.replace('Z', '+00:00'))
+                # Convert to timezone-naive to match database expectations
+                if due_date_value.tzinfo is not None:
+                    due_date_value = due_date_value.replace(tzinfo=None)
             except ValueError:
                 return ToolResult(success=False, error="Invalid due date format")
 
-        async with get_db_session() as db:
-            # Get the task and verify ownership
-            statement = select(Task).where(
-                Task.id == task_uuid,
-                Task.user_id == uuid.UUID(user_id)
-            )
-            result = await db.exec(statement)
-            task = result.first()
-
+        # Import here to avoid circular imports
+        from database.db import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Create a session directly using the engine
+        async with AsyncSession(engine) as db:
+            task = None
+            
+            # Determine the task based on either task_id or task_name
+            if validated_params.task_id:
+                # Validate UUID format
+                try:
+                    task_uuid = uuid.UUID(validated_params.task_id)
+                    # Get the task by ID and verify ownership
+                    statement = select(Task).where(
+                        Task.id == task_uuid,
+                        Task.user_id == uuid.UUID(user_id)
+                    )
+                    result = await db.execute(statement)
+                    task = result.scalar_one_or_none()
+                except ValueError:
+                    return ToolResult(success=False, error="Invalid task ID format")
+            elif validated_params.task_name:
+                # Get the task by name
+                task = await get_task_by_name(db, user_id, validated_params.task_name)
+            
             if not task:
                 return ToolResult(success=False, error="Task not found or not authorized")
 
-            # Update fields that were provided
+            # Update fields that were provided (excluding task_id and task_name)
             update_fields = validated_params.dict(exclude_unset=True)
             for field, value in update_fields.items():
-                if field != 'task_id':  # Don't update the task_id
+                if field not in ['task_id', 'task_name']:  # Don't update these fields
                     if field == 'due_date':
                         setattr(task, field, due_date_value)
+                    elif field == 'is_recurring':
+                        # Update is_recurring and handle recurrence_pattern accordingly
+                        setattr(task, field, value)
+                        # If is_recurring is False, set recurrence_pattern to None
+                        if value is False:
+                            setattr(task, 'recurrence_pattern', None)
                     else:
                         setattr(task, field, value)
 
             task.updated_at = datetime.utcnow()
             await db.commit()
             await db.refresh(task)
+
+            # Send real-time update to the frontend
+            try:
+                await manager.broadcast_to_user({
+                    "type": "task_updated",
+                    "task": task.dict(),
+                    "timestamp": datetime.utcnow().isoformat()
+                }, user_id)
+            except Exception as e:
+                # Log the error but don't fail the operation
+                print(f"Error broadcasting task update: {str(e)}")
 
             return ToolResult(success=True, data=task.dict())
 
