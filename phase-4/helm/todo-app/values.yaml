@@ -1,0 +1,85 @@
+# Default values for todo-app
+
+# Frontend configuration
+frontend:
+  replicaCount: 2
+  image:
+    repository: todo-frontend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: todo.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: todo-tls-secret
+        hosts:
+          - todo.example.com
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Backend configuration
+backend:
+  replicaCount: 2
+  image:
+    repository: todo-backend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Configuration
+config:
+  apiBaseUrl: "https://todo.example.com/api"
+
+# Security
+security:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Database configuration (placeholder)
+database:
+  url: ""
+
+# Authentication configuration (placeholder)
+auth:
+  secret: ""
+
+# Namespace configuration
+namespace:
+  create: true
+  name: "todo-app-prod"

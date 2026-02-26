@@ -13,9 +13,8 @@ const nextConfig = {
       },
     ],
   },
-  turbopack: {
-    root: __dirname,
-  },
+  // Removed turbopack configuration as it's causing build issues
+  // turbopack is experimental and may not work with all Next.js features
 };
 
 module.exports = nextConfig;

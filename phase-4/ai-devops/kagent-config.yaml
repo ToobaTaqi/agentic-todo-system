@@ -1,0 +1,119 @@
+# kagent Configuration for Todo App
+# AI-powered autonomous Kubernetes operations agent
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kagent-config
+  namespace: todo-app-prod
+data:
+  # Agent configuration
+  AGENT_NAME: "todo-app-kagent"
+  NAMESPACE: "todo-app-prod"
+  LOG_LEVEL: "INFO"
+  
+  # AI Model Configuration
+  AI_MODEL_PROVIDER: "openai"
+  AI_MODEL_NAME: "gpt-4-turbo"
+  AI_TEMPERATURE: "0.2"
+  AI_MAX_TOKENS: "2048"
+  
+  # Monitoring Configuration
+  MONITORING_INTERVAL: "30"  # seconds
+  METRICS_SCRAPE_INTERVAL: "60"  # seconds
+  ALERT_EVALUATION_INTERVAL: "15"  # seconds
+  
+  # Auto-scaling Configuration
+  ENABLE_AUTO_SCALING: "true"
+  CPU_THRESHOLD_HIGH: "75"  # percentage
+  CPU_THRESHOLD_LOW: "30"   # percentage
+  MEMORY_THRESHOLD_HIGH: "80"  # percentage
+  MEMORY_THRESHOLD_LOW: "25"   # percentage
+  SCALE_UP_FACTOR: "1.5"    # multiplier
+  SCALE_DOWN_FACTOR: "0.8"  # multiplier
+  MIN_REPLICAS: "2"
+  MAX_REPLICAS: "10"
+  
+  # Auto-healing Configuration
+  ENABLE_AUTO_HEALING: "true"
+  POD_RESTART_THRESHOLD: "5"  # restarts per minute
+  UNHEALTHY_POD_TIMEOUT: "300"  # seconds
+  DEPLOYMENT_ROLLOUT_TIMEOUT: "600"  # seconds
+  
+  # Backup and Recovery
+  ENABLE_AUTOMATED_BACKUPS: "false"  # Enable when backup system is configured
+  BACKUP_SCHEDULE: "0 2 * * *"  # Daily at 2 AM
+  BACKUP_RETENTION_DAYS: "30"
+  
+  # Cost Optimization
+  ENABLE_COST_OPTIMIZATION: "true"
+  RESOURCE_USAGE_THRESHOLD: "90"  # percentage for optimization recommendations
+  OPTIMIZATION_EVALUATION_INTERVAL: "3600"  # seconds (1 hour)
+  
+  # Security Monitoring
+  ENABLE_SECURITY_MONITORING: "true"
+  SECURITY_SCAN_INTERVAL: "1440"  # minutes (24 hours)
+  ANOMALY_DETECTION_ENABLED: "true"
+  COMPLIANCE_CHECK_INTERVAL: "4320"  # minutes (3 days)
+  
+  # Predictive Analytics
+  PREDICTIVE_MAINTENANCE_ENABLED: "true"
+  USAGE_PATTERN_ANALYSIS_WINDOW: "604800"  # seconds (7 days)
+  FAILURE_PREDICTION_HORIZON: "86400"  # seconds (24 hours)
+  
+  # Notification Configuration
+  NOTIFICATION_CHANNELS: "slack,email"
+  CRITICAL_ALERTS_ENABLED: "true"
+  OPERATIONAL_LOGGING_ENABLED: "true"
+  
+  # Resource Configuration
+  TARGET_RESOURCES: "deployments,services,pods,statefulsets"
+  EXCLUDE_RESOURCES: "kube-system,kube-public"
+  
+  # AI Decision Confidence Thresholds
+  DECISION_CONFIDENCE_THRESHOLD: "0.85"  # Minimum confidence for autonomous actions
+  HUMAN_APPROVAL_THRESHOLD: "0.60"      # Threshold for requiring human approval
+---
+# RBAC for kagent
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kagent-sa
+  namespace: todo-app-prod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kagent-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets", "namespaces"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses", "networkpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["nodes", "events", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kagent-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: kagent-sa
+  namespace: todo-app-prod
+roleRef:
+  kind: ClusterRole
+  name: kagent-role
+  apiGroup: rbac.authorization.k8s.io

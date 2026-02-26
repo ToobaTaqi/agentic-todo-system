@@ -3,10 +3,14 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '../lib/contexts/AuthContext';
 // import { NotificationProvider } from '../components/Notifications/NotificationProvider';
-import { NotificationProvider } from '../components/notifications/NotificationProvider'; 
+import { NotificationProvider } from '../components/notifications/NotificationProvider';
 import Navbar from '../components/Navbar/Navbar';
 
-const inter = Inter({ subsets: ['latin'] });
+// Updated font configuration to avoid Turbopack issues
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // Use swap to avoid font loading issues
+});
 
 export const metadata: Metadata = {
   title: 'AI-Ready Todo App',

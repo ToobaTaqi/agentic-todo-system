@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: todo-app-prod
+data:
+  api-base-url: "https://todo.example.com/api"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: todo-app-prod
+data:
+  api-base-url: "https://todo.example.com/api"

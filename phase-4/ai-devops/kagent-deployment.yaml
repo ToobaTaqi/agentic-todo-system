@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kagent-deployment
+  namespace: todo-app-prod
+  labels:
+    app: kagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kagent
+  template:
+    metadata:
+      labels:
+        app: kagent
+    spec:
+      serviceAccountName: kagent-sa
+      containers:
+      - name: kagent
+        image: ghcr.io/kelseyhightower/kube-agent:latest  # Placeholder image
+        env:
+        - name: AGENT_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: AGENT_NAME
+        - name: NAMESPACE
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: NAMESPACE
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: LOG_LEVEL
+        - name: AI_MODEL_PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: AI_MODEL_PROVIDER
+        - name: AI_MODEL_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: AI_MODEL_NAME
+        - name: AI_TEMPERATURE
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: AI_TEMPERATURE
+        - name: AI_MAX_TOKENS
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: AI_MAX_TOKENS
+        - name: MONITORING_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: MONITORING_INTERVAL
+        - name: ENABLE_AUTO_SCALING
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: ENABLE_AUTO_SCALING
+        - name: CPU_THRESHOLD_HIGH
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: CPU_THRESHOLD_HIGH
+        - name: CPU_THRESHOLD_LOW
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: CPU_THRESHOLD_LOW
+        - name: MEMORY_THRESHOLD_HIGH
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: MEMORY_THRESHOLD_HIGH
+        - name: MEMORY_THRESHOLD_LOW
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: MEMORY_THRESHOLD_LOW
+        - name: ENABLE_AUTO_HEALING
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: ENABLE_AUTO_HEALING
+        - name: DECISION_CONFIDENCE_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: DECISION_CONFIDENCE_THRESHOLD
+        - name: HUMAN_APPROVAL_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: kagent-config
+              key: HUMAN_APPROVAL_THRESHOLD
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/grpc_health_probe
+            - -addr=:50051
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/grpc_health_probe
+            - -addr=:50051
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # Need write access for logs and temporary files
+          capabilities:
+            drop:
+            - ALL

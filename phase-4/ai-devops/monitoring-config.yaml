@@ -1,0 +1,127 @@
+# Monitoring and Observability Configuration for AI DevOps Tools
+
+# Prometheus ServiceMonitor for kagent
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kagent-servicemonitor
+  namespace: todo-app-prod
+  labels:
+    app: kagent
+spec:
+  selector:
+    matchLabels:
+      app: kagent
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+---
+# Grafana Dashboard for AI DevOps Operations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-devops-dashboard
+  namespace: todo-app-prod
+  labels:
+    grafana_dashboard: "1"
+data:
+  ai-devops-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "AI DevOps Operations - Todo App",
+        "tags": ["ai", "devops", "kubernetes"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "AI Agent Activity",
+            "type": "stat",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+            "targets": [
+              {
+                "expr": "sum(increase(kagent_decisions_total[1h]))",
+                "legendFormat": "Decisions Made (Last Hour)"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Autonomous Actions",
+            "type": "graph",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+            "targets": [
+              {
+                "expr": "rate(kagent_autonomous_actions_total[5m])",
+                "legendFormat": "Actions per Second"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Human Approval Requests",
+            "type": "graph",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+            "targets": [
+              {
+                "expr": "increase(kagent_approval_requests_total[1h])",
+                "legendFormat": "Requests (Last Hour)"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "title": "AI Confidence Levels",
+            "type": "heatmap",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+            "targets": [
+              {
+                "expr": "kagent_decision_confidence",
+                "legendFormat": "Confidence Distribution"
+              }
+            ]
+          }
+        ],
+        "time": {"from": "now-6h", "to": "now"},
+        "refresh": "30s"
+      }
+    }
+---
+# Alertmanager configuration for AI DevOps
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-devops-alerts
+  namespace: todo-app-prod
+data:
+  alerts.yml: |
+    groups:
+    - name: ai_devops_alerts
+      rules:
+      - alert: LowAIAgentConfidence
+        expr: avg(kagent_decision_confidence) < 0.7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI agent confidence is below threshold"
+          description: "Average AI agent decision confidence is below 70% for more than 5 minutes"
+      
+      - alert: HighApprovalRequests
+        expr: increase(kagent_approval_requests_total[10m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of approval requests"
+          description: "AI agent requested more than 10 approvals in the last 10 minutes"
+      
+      - alert: AgentInactive
+        expr: up{job="kagent"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI agent is inactive"
+          description: "The kagent has been down for more than 2 minutes"
